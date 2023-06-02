@@ -17,7 +17,7 @@ defmodule GeneratorRacunaWeb.Router do
   scope "/", GeneratorRacunaWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", PageLive
   end
 
   # Other scopes may use custom stacks.
