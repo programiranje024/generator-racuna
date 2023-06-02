@@ -1,4 +1,6 @@
 defmodule GeneratorRacunaWeb.PageLive do
+  alias GeneratorRacuna.Invoice
+  alias GeneratorRacuna.Invoice.Item
   use GeneratorRacunaWeb, :live_view
 
   def mount(_params, _session, socket) do
@@ -164,9 +166,38 @@ defmodule GeneratorRacunaWeb.PageLive do
     end
   end
 
-  defp handle_generate_pdf(socket, _params) do
-    {:noreply,
-     socket
-     |> put_flash(:info, "PDF uspešno generisan")}
+  defp handle_generate_pdf(socket, %{
+         "name" => name,
+         "date" => date,
+         "due_date" => due_date
+       }) do
+    with items <-
+           Enum.map(socket.assigns.items, fn item ->
+             Item.create("#{item.service}: #{item.description}", item.price)
+           end),
+         invoice <- Invoice.create(name, date, due_date, items),
+         html <- Invoice.render(invoice),
+         filename <- generate_filename(),
+         {:ok, content} <-
+           PdfGenerator.generate_binary(html,
+             page_size: "A5",
+             shell_params: ["--encoding", "utf-8"]
+           ),
+         :ok <- File.write("priv/static/generated/#{filename}", content) do
+      {:noreply,
+       socket
+       |> put_flash(
+         :info,
+         "PDF uspešno generisan! Preuzmite ga <a href='/generated/#{filename}'>ovde</a>"
+       )}
+    else
+      err ->
+        IO.inspect(err)
+        {:noreply, socket |> put_flash(:error, "Došlo je do greške prilikom generisanja PDF-a")}
+    end
+  end
+
+  defp generate_filename do
+    "invoice_#{DateTime.utc_now() |> DateTime.to_unix()}.pdf"
   end
 end

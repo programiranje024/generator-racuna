@@ -28,6 +28,9 @@ generator_racuna-*.tar
 # Ignore assets that are produced by build tools.
 /priv/static/assets/
 
+# Ignore generated PDF files.
+/priv/static/generated/*.pdf
+
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 
@@ -35,3 +38,5 @@ generator_racuna-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Ignore Mac specific files
+.DS_Store
