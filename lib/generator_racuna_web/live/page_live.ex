@@ -39,25 +39,19 @@ defmodule GeneratorRacunaWeb.PageLive do
 
         <div class="form-group" data-hidden={@no_items}>
           <label for="name">Ime klijenta</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            placeholder="Ime klijenta..."
-            required={!@no_items}
-          />
+          <input type="text" id="name" name="name" placeholder="Ime klijenta..." />
         </div>
 
         <hr data-hidden={@no_items} />
 
         <div class="form-group" data-hidden={@no_items}>
           <label for="date">Datum</label>
-          <input type="date" id="date" name="date" required={!@no_items} />
+          <input type="date" id="date" name="date" />
         </div>
 
         <div class="form-group" data-hidden={@no_items}>
           <label for="due_date">Rok plaćanja</label>
-          <input type="date" id="due_date" name="due_date" required={!@no_items} />
+          <input type="date" id="due_date" name="due_date" />
         </div>
 
         <hr data-hidden={@no_items} />
@@ -150,7 +144,7 @@ defmodule GeneratorRacunaWeb.PageLive do
          socket,
          %{"service" => service, "description" => description, "price" => price}
        ) do
-    with {:ok, price} <- string_not_empty(price, "Broj cene"),
+    with {:ok, price} <- string_not_empty(price, "Cena"),
          {:ok, service} <- string_not_empty(service, "Tip usluge"),
          {:ok, description} <- string_not_empty(description, "Opis usluge"),
          {price, ""} <- Float.parse(price) do
@@ -164,6 +158,7 @@ defmodule GeneratorRacunaWeb.PageLive do
        |> push_event("clear-item-form", %{})}
     else
       :error -> {:noreply, socket |> put_flash(:error, "Cena mora biti broj")}
+      {:error, "Cena"} -> {:noreply, socket |> put_flash(:error, "Cena ne sme biti prazna")}
       {:error, string} -> {:noreply, socket |> put_flash(:error, "#{string} ne sme biti prazan")}
     end
   end
@@ -173,7 +168,10 @@ defmodule GeneratorRacunaWeb.PageLive do
          "date" => date,
          "due_date" => due_date
        }) do
-    with items <-
+    with {:ok, name} <- string_not_empty(name, "Ime klijenta"),
+         {:ok, date} <- string_not_empty(date, "Datum"),
+         {:ok, due_date} <- string_not_empty(due_date, "Rok plaćanja"),
+         items <-
            Enum.map(socket.assigns.items, fn item ->
              Item.create("#{Item.type_to_string(item.service)}: #{item.description}", item.price)
            end),
@@ -194,8 +192,13 @@ defmodule GeneratorRacunaWeb.PageLive do
        )
        |> push_event("download", %{"url" => "/generated/#{filename}"})}
     else
-      err ->
-        IO.inspect(err)
+      {:error, "Ime klijenta"} ->
+        {:noreply, socket |> put_flash(:error, "Ime klijenta ne sme biti prazno")}
+
+      {:error, string} ->
+        {:noreply, socket |> put_flash(:error, "#{string} ne sme biti prazan")}
+
+      _error ->
         {:noreply, socket |> put_flash(:error, "Došlo je do greške prilikom generisanja PDF-a")}
     end
   end

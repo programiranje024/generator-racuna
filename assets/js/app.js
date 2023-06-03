@@ -59,6 +59,13 @@ window.addEventListener("phx:clear-item-form", function (e) {
   });
 });
 
+// close flash messages
+window.addEventListener("click", function (e) {
+  const flash = document.getElementById("flash");
+  if (flash) {
+    flash.querySelector("button").click();
+  }
+});
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
