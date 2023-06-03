@@ -3,6 +3,11 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+html, body {
+  @apply h-full w-full;
+  box-sizing: border-box;
+}
+
 hr {
   @apply border-gray-300 max-w-lg;
 }
