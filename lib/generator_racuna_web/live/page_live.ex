@@ -116,7 +116,7 @@ defmodule GeneratorRacunaWeb.PageLive do
                 phx-value-idx={idx}
               >
                 <div class="flex gap-2">
-                  <div><%= service_to_string(item.service) %>:</div>
+                  <div><%= Item.type_to_string(item.service) %>:</div>
                   <div><%= item.description %></div>
                 </div>
                 <div><%= item.price %> RSD</div>
@@ -127,16 +127,6 @@ defmodule GeneratorRacunaWeb.PageLive do
       </div>
     </div>
     """
-  end
-
-  defp service_to_string(service) do
-    case service do
-      "tutoring" -> "Privatni čas"
-      "course" -> "Kurs"
-      "project" -> "Izrada projekta"
-      "tariff" -> "Tarifa"
-      "discount" -> "Popust"
-    end
   end
 
   defp string_not_empty(string, name) do
@@ -173,7 +163,7 @@ defmodule GeneratorRacunaWeb.PageLive do
        }) do
     with items <-
            Enum.map(socket.assigns.items, fn item ->
-             Item.create("#{item.service}: #{item.description}", item.price)
+             Item.create("#{Item.type_to_string(item.service)}: #{item.description}", item.price)
            end),
          invoice <- Invoice.create(name, date, due_date, items),
          html <- Invoice.render(invoice),

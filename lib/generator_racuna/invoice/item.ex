@@ -9,7 +9,13 @@ defmodule GeneratorRacuna.Invoice.Item do
     %__MODULE__{name: name, price: price}
   end
 
-  def render(item) do
-    "#{item.name} - #{item.price} RSD"
+  def type_to_string(type) do
+    case type do
+      "tutoring" -> "Privatni čas"
+      "course" -> "Kurs"
+      "project" -> "Izrada projekta"
+      "tariff" -> "Tarifa"
+      "discount" -> "Popust"
+    end
   end
 end
