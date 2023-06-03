@@ -46,7 +46,7 @@ defmodule GeneratorRacuna.Invoice do
         </table>
         <div class='total'>
           <p class="bold">Ukupna cena:</p>
-          <p>#{Enum.sum(Enum.map(items, & &1.price))} RSD</p>
+          <p>#{:erlang.float_to_binary(Enum.sum(Enum.map(items, & &1.price)), decimals: 2)} RSD</p>
         </div>
       </body>
     """
@@ -57,7 +57,7 @@ defmodule GeneratorRacuna.Invoice do
       """
       <tr>
         <td>#{item.name}</td>
-        <td>#{item.price} RSD</td>
+        <td>#{:erlang.float_to_binary(item.price, decimals: 2)} RSD</td>
       </tr>
       """
     end)

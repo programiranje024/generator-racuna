@@ -27,6 +27,17 @@ defmodule GeneratorRacunaWeb.PageLive do
   def render(assigns) do
     assigns = assign(assigns, :no_items, assigns.items == [])
 
+    assigns =
+      assign(
+        assigns,
+        :total,
+        if assigns.no_items do
+          0
+        else
+          Enum.sum(Enum.map(assigns.items, & &1.price))
+        end
+      )
+
     ~H"""
     <div class="grid grid-cols-2 gap-4">
       <form
@@ -126,6 +137,12 @@ defmodule GeneratorRacunaWeb.PageLive do
                 <div><%= :erlang.float_to_binary(item.price, decimals: 2) %> RSD</div>
               </div>
             <% end %>
+            <div class="flex justify-between">
+              <div class="font-bold">Ukupno:</div>
+              <div class="font-bold">
+                <%= @total %> RSD
+              </div>
+            </div>
           <% end %>
         </div>
       </div>
