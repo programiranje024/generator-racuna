@@ -46,7 +46,7 @@ defmodule GeneratorRacunaWeb.PageLive do
 
         <div class="form-group" data-hidden={@no_items}>
           <label for="date">Datum</label>
-          <input type="date" id="date" name="date" />
+          <input type="date" id="date" name="date" value={Date.utc_today()} />
         </div>
 
         <div class="form-group" data-hidden={@no_items}>
@@ -171,6 +171,7 @@ defmodule GeneratorRacunaWeb.PageLive do
     with {:ok, name} <- string_not_empty(name, "Ime klijenta"),
          {:ok, date} <- string_not_empty(date, "Datum"),
          {:ok, due_date} <- string_not_empty(due_date, "Rok plaćanja"),
+         {:ok, {date, due_date}} <- validate_dates(date, due_date),
          items <-
            Enum.map(socket.assigns.items, fn item ->
              Item.create("#{Item.type_to_string(item.service)}: #{item.description}", item.price)
@@ -192,6 +193,9 @@ defmodule GeneratorRacunaWeb.PageLive do
        )
        |> push_event("download", %{"url" => "/generated/#{filename}"})}
     else
+      {:error, :date} ->
+        {:noreply, socket |> put_flash(:error, "Datum ne sme biti posle roka plaćanja")}
+
       {:error, "Ime klijenta"} ->
         {:noreply, socket |> put_flash(:error, "Ime klijenta ne sme biti prazno")}
 
@@ -205,5 +209,23 @@ defmodule GeneratorRacunaWeb.PageLive do
 
   defp generate_filename do
     "invoice_#{DateTime.utc_now() |> DateTime.to_unix()}.pdf"
+  end
+
+  defp validate_dates(date, due_date) do
+    # Convert to Date structs
+    with {:ok, date_n} <- Date.from_iso8601(date),
+         {:ok, due_date_n} <- Date.from_iso8601(due_date),
+         true <- Date.compare(date_n, due_date_n) in [:lt, :eq] do
+      {:ok, {date, due_date}}
+    else
+      :gt -> {:error, :date}
+      _error -> :error
+    end
+
+    # case Date.compare(date, due_date) do
+    #   :lt -> {:ok, {date, due_date}}
+    #   :eq -> {:ok, {date, due_date}}
+    #   :gt -> {:error, :date}
+    # end
   end
 end
