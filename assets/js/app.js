@@ -38,11 +38,25 @@ window.addEventListener("phx:page-loading-stop", (_info) => topbar.hide());
 // connect if there are any LiveViews on the page
 liveSocket.connect();
 
-// custom event to notify when LiveView is mounted
+window.addEventListener("phx:page-loading-stop", function (e) {
+  // reset textarea
+  document.querySelectorAll("textarea").forEach((textarea) => {
+    textarea.value = "";
+  });
+});
+
+// custom event to notify when pdf is ready for download
 window.addEventListener("phx:download", function (e) {
   const { url } = e.detail;
 
   window.open(url, "_blank");
+});
+
+// custom event to notify when we add a new item
+window.addEventListener("phx:clear-item-form", function (e) {
+  ["description", "price"].forEach((field) => {
+    document.getElementById(field).value = "";
+  });
 });
 
 // expose liveSocket on window for web console debug logs and latency simulation:

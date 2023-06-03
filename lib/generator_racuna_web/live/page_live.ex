@@ -4,8 +4,7 @@ defmodule GeneratorRacunaWeb.PageLive do
   use GeneratorRacunaWeb, :live_view
 
   def mount(_params, _session, socket) do
-    {:ok,
-     assign(socket, items: [%{service: "tutoring", description: "Opis usluge", price: 1000}])}
+    {:ok, assign(socket, items: [])}
   end
 
   def handle_event(
@@ -30,27 +29,38 @@ defmodule GeneratorRacunaWeb.PageLive do
 
     ~H"""
     <div class="grid grid-cols-2 gap-4">
-      <form class="form" phx-submit="handle_form" action="#">
+      <form
+        id="form"
+        class="form"
+        phx-submit="handle_form"
+        phx-update={if !@no_items, do: "ignore", else: "replace"}
+      >
         <h1 class="text-3xl mb-3">Račun</h1>
 
-        <div class="form-group">
+        <div class="form-group" data-hidden={@no_items}>
           <label for="name">Ime klijenta</label>
-          <input type="text" id="name" name="name" placeholder="Ime klijenta..." required />
+          <input
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Ime klijenta..."
+            required={!@no_items}
+          />
         </div>
 
-        <hr />
+        <hr data-hidden={@no_items} />
 
-        <div class="form-group">
+        <div class="form-group" data-hidden={@no_items}>
           <label for="date">Datum</label>
-          <input type="date" id="date" name="date" required />
+          <input type="date" id="date" name="date" required={!@no_items} />
         </div>
 
-        <div class="form-group">
+        <div class="form-group" data-hidden={@no_items}>
           <label for="due_date">Rok plaćanja</label>
-          <input type="date" id="due_date" name="due_date" required />
+          <input type="date" id="due_date" name="due_date" required={!@no_items} />
         </div>
 
-        <hr />
+        <hr data-hidden={@no_items} />
 
         <div class="form-group">
           <label for="service">Vrsta stavke</label>
@@ -119,7 +129,7 @@ defmodule GeneratorRacunaWeb.PageLive do
                   <div><%= Item.type_to_string(item.service) %>:</div>
                   <div><%= item.description %></div>
                 </div>
-                <div><%= item.price %> RSD</div>
+                <div><%= :erlang.float_to_binary(item.price, decimals: 2) %> RSD</div>
               </div>
             <% end %>
           <% end %>
@@ -147,9 +157,11 @@ defmodule GeneratorRacunaWeb.PageLive do
       {:noreply,
        assign(socket,
          items:
-           socket.assigns.items ++ [%{service: service, description: description, price: price}]
+           socket.assigns.items ++
+             [%{service: service, description: description, price: price}]
        )
-       |> put_flash(:info, "Stavka uspešno dodata")}
+       |> put_flash(:info, "Stavka uspešno dodata")
+       |> push_event("clear-item-form", %{})}
     else
       :error -> {:noreply, socket |> put_flash(:error, "Cena mora biti broj")}
       {:error, string} -> {:noreply, socket |> put_flash(:error, "#{string} ne sme biti prazan")}

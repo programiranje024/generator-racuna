@@ -25,3 +25,7 @@ hr {
   @apply text-red-500;
   content: "*";
 }
+
+[data-hidden] {
+  @apply hidden;
+}
