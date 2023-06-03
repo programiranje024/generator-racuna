@@ -188,8 +188,9 @@ defmodule GeneratorRacunaWeb.PageLive do
        socket
        |> put_flash(
          :info,
-         "PDF uspešno generisan! Preuzmite ga <a href='/generated/#{filename}'>ovde</a>"
-       )}
+         "PDF uspešno generisan!"
+       )
+       |> push_event("download", %{"url" => "/generated/#{filename}"})}
     else
       err ->
         IO.inspect(err)
