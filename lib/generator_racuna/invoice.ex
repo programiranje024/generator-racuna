@@ -30,7 +30,7 @@ defmodule GeneratorRacuna.Invoice do
       </head>
       <body>
         <h1>Programiranje 024</h1>
-        <h3>Mušterija: #{name}</h3>
+        <h3>Klijent: #{name}</h3>
         <p class="m0"><span class="bold">Datum:</span> #{format_date(date)}</p>
         <p class="m0"><span class="bold">Rok plaćanja:</span> #{format_date(due_date)}</p>
         <table>
@@ -82,6 +82,17 @@ defmodule GeneratorRacuna.Invoice do
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
+    }
+
+    th,
+    tr:nth-child(even) {
+      background-color: #1c1c1c;
+      color: #f2f2f2;
+    }
+
+    th:first-child,
+    tr:nth-child(even) td:first-child {
+      border-right-color: #f2f2f2;
     }
 
     table, th, td {
