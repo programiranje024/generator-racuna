@@ -20,8 +20,10 @@ defmodule GeneratorRacuna.Invoice do
   end
 
   def render(%__MODULE__{name: name, date: date, due_date: due_date, items: items}) do
-    """
-    <html>
+    with {:ok, path} <- File.cwd(),
+         image_path = Path.join(path, "/priv/static/images/logo.png") do
+      """
+      <html>
       <head>
         <title>#{name}</title>
         <style>
@@ -29,7 +31,7 @@ defmodule GeneratorRacuna.Invoice do
         </style>
       </head>
       <body>
-        <h1>Programiranje 024</h1>
+        <img src="#{get_image_base64(image_path, "image/png")}" alt="Logo" height="100">
         <h3>Klijent: #{name}</h3>
         <p class="m0"><span class="bold">Datum:</span> #{format_date(date)}</p>
         <p class="m0"><span class="bold">Rok plaćanja:</span> #{format_date(due_date)}</p>
@@ -49,7 +51,10 @@ defmodule GeneratorRacuna.Invoice do
           <p>#{:erlang.float_to_binary(Enum.sum(Enum.map(items, & &1.price)), decimals: 2)} RSD</p>
         </div>
       </body>
-    """
+      """
+    else
+      _error -> "Failed to render invoice"
+    end
   end
 
   defp render_items(items) do
@@ -63,8 +68,22 @@ defmodule GeneratorRacuna.Invoice do
     end)
   end
 
+  defp get_image_base64(path, mime) do
+    with {:ok, content} <- File.read(path),
+         base64 <- Base.encode64(content) do
+      "data:#{mime};base64,#{base64}"
+    else
+      _error -> "Failed to read image"
+    end
+  end
+
   defp get_css() do
     """
+    img {
+      display: block;
+      margin: 0 auto;
+    }
+
     .m0 {
       margin: 0;
     }
