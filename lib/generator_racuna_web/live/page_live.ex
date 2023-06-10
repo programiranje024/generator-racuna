@@ -32,11 +32,13 @@ defmodule GeneratorRacunaWeb.PageLive do
         assigns,
         :total,
         if assigns.no_items do
-          0
+          0.0
         else
           Enum.sum(Enum.map(assigns.items, & &1.price))
         end
       )
+
+    assigns = assign(assigns, :total, :erlang.float_to_binary(assigns.total, decimals: 2))
 
     ~H"""
     <div class="grid grid-cols-2 gap-4">
@@ -229,7 +231,6 @@ defmodule GeneratorRacunaWeb.PageLive do
   end
 
   defp validate_dates(date, due_date) do
-    # Convert to Date structs
     with {:ok, date_n} <- Date.from_iso8601(date),
          {:ok, due_date_n} <- Date.from_iso8601(due_date),
          true <- Date.compare(date_n, due_date_n) in [:lt, :eq] do
@@ -238,11 +239,5 @@ defmodule GeneratorRacunaWeb.PageLive do
       :gt -> {:error, :date}
       _error -> :error
     end
-
-    # case Date.compare(date, due_date) do
-    #   :lt -> {:ok, {date, due_date}}
-    #   :eq -> {:ok, {date, due_date}}
-    #   :gt -> {:error, :date}
-    # end
   end
 end
